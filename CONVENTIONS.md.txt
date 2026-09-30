@@ -1,0 +1,171 @@
+# Convenciones del proyecto
+
+Estas convenciones definen las reglas mínimas para desarrollar nuevas funcionalidades en el MVP de AppCitasMedicas.
+
+El objetivo es mantener una arquitectura simple, coherente y orientada al negocio, evitando introducir complejidad que no sea necesaria.
+
+## 1. Organización por módulos de negocio
+
+El código se organiza principalmente por **capacidades de negocio**, no por capas técnicas globales.
+
+Los módulos actuales son:
+
+```text
+Modules/
+├── CatalogoMedico/
+├── Agenda/
+├── Reservas/
+└── Clinica/
+```
+
+No crear estructuras globales como:
+
+```text
+Controllers/
+Services/
+Repositories/
+Models/
+```
+
+como mecanismo principal de organización.
+
+Cada módulo es responsable de sus propias funcionalidades y reglas de negocio.
+
+## 2. Vertical slices
+
+Las funcionalidades se organizan como **vertical slices** que representan casos de uso completos.
+
+Ejemplo:
+
+```text
+Reservas/
+├── ReservarTurno/
+└── CancelarReserva/
+```
+
+Un slice debe representar un flujo de negocio completo.
+
+No crear un slice separado para:
+
+* una pantalla;
+* un formulario;
+* un campo;
+* una entidad;
+* una operación técnica aislada.
+
+Si varias historias de usuario forman parte del mismo flujo, deben implementarse dentro del mismo slice.
+
+## 3. Responsabilidad de los Controllers
+
+Los Controllers deben encargarse principalmente de:
+
+* recibir la solicitud HTTP;
+* validar la entrada básica;
+* invocar el caso de uso correspondiente;
+* devolver la respuesta o View adecuada.
+
+Las reglas de negocio no deben implementarse en los Controllers.
+
+Flujo esperado:
+
+```text
+HTTP Request
+    ↓
+Controller
+    ↓
+Caso de uso / Vertical Slice
+    ↓
+Dominio y persistencia
+    ↓
+Resultado
+    ↓
+HTTP Response / View
+```
+
+## 4. Límites entre módulos
+
+Los módulos deben respetar sus límites de negocio.
+
+Un módulo no debe manipular directamente los detalles internos de otro módulo.
+
+Por ejemplo, `Reservas` no debe modificar directamente el estado interno de `Agenda` saltándose las reglas del módulo.
+
+La comunicación entre módulos debe realizarse mediante una interfaz o mecanismo explícito apropiado para el caso.
+
+No introducir mecanismos complejos como mensajería, buses o eventos distribuidos salvo que exista una necesidad real.
+
+## 5. Uso de Shared
+
+`Shared` debe mantenerse pequeño.
+
+Solo debe contener código que sea realmente transversal y utilizado por varios módulos.
+
+Ejemplo:
+
+```text
+Shared/
+├── Result/
+├── Exceptions/
+└── ...
+```
+
+No utilizar `Shared` como un lugar genérico para código que no se sabe dónde ubicar.
+
+Si un componente pertenece claramente a un módulo de negocio, debe permanecer dentro de ese módulo.
+
+## 6. Tests de reglas críticas
+
+Las reglas de negocio críticas deben tener tests.
+
+Para el MVP, la prioridad son las reglas relacionadas con reservas:
+
+```text
+Reservar turno disponible
+    → reserva creada
+
+Reservar turno ya reservado
+    → operación rechazada
+
+Dos reservas simultáneas
+    → solamente una puede tener éxito
+
+Cancelar reserva
+    → turno liberado
+```
+
+No se establece una cobertura porcentual obligatoria.
+
+La prioridad es verificar los comportamientos de negocio cuya falla comprometería el funcionamiento del sistema.
+
+## 7. Evitar sobreingeniería
+
+No introducir patrones, frameworks o capas adicionales únicamente por seguir una arquitectura determinada.
+
+No son requisitos del proyecto:
+
+* Repository Pattern;
+* CQRS;
+* MediatR;
+* interfaces para cada clase;
+* DTOs obligatorios para todas las operaciones;
+* eventos entre módulos;
+* un `DbContext` por módulo;
+* un proyecto `.csproj` independiente por módulo;
+* una capa adicional sin una necesidad concreta.
+
+Antes de introducir una nueva abstracción, debe existir una necesidad clara que justifique su complejidad.
+
+## 8. Regla general para nuevas funcionalidades
+
+Al implementar una nueva funcionalidad:
+
+1. Identificar la **capacidad de negocio** a la que pertenece.
+2. Determinar si corresponde a un módulo existente.
+3. Identificar el **flujo de negocio completo**.
+4. Crear o ampliar el vertical slice correspondiente.
+5. Mantener las reglas de negocio dentro del caso de uso o dominio.
+6. Respetar los límites entre módulos.
+7. Agregar tests para las reglas de negocio críticas.
+8. Evitar nuevas abstracciones si la funcionalidad puede implementarse de forma sencilla con la arquitectura existente.
+
+La solución más simple que mantenga correctamente las reglas de negocio es la opción preferida.
