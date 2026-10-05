@@ -29,13 +29,13 @@
             @foreach (var especialidad in Model)
             {
                 <li>
-                    <a class="specialty-card" asp-controller="Especialidades" asp-action="BuscarTurnos" asp-route-id="@especialidad.Id">
+                    <a class="specialty-card" asp-controller="Especialidades" asp-action="BuscarTurnos" asp-route-id="@especialidad.Id" aria-label="Seleccionar @especialidad.Nombre y continuar con la búsqueda de turnos">
                         <span class="specialty-icon" aria-hidden="true">+</span>
                         <span class="specialty-copy">
                             <span class="specialty-name">@especialidad.Nombre</span>
                             <span class="specialty-description">@especialidad.Descripcion</span>
                         </span>
-                        <span class="specialty-arrow" aria-hidden="true">→</span>
+                        <span class="specialty-action">Seleccionar <span aria-hidden="true">→</span></span>
                     </a>
                 </li>
             }
