@@ -1,7 +1,19 @@
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+var connectionString = builder.Configuration.GetConnectionString("CitasMedicas");
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException("Configure la cadena de conexión en ConnectionStrings:CitasMedicas o en la variable de entorno ConnectionStrings__CitasMedicas.");
+}
+
+builder.Services.AddDbContext<CitasMedicas.Web.Modules.CatalogoMedico.Infrastructure.ClinicaDbContext>(options =>
+    options.UseSqlServer(connectionString));
+builder.Services.AddScoped<CitasMedicas.Web.Modules.CatalogoMedico.ListarEspecialidades.ListarEspecialidadesUseCase>();
+builder.Services.AddScoped<CitasMedicas.Web.Modules.CatalogoMedico.CrearEspecialidad.CrearEspecialidadUseCase>();
 
 var app = builder.Build();
 
@@ -22,7 +34,7 @@ app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
+    pattern: "{controller=Especialidades}/{action=Index}/{id?}")
     .WithStaticAssets();
 
 

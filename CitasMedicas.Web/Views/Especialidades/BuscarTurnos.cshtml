@@ -1,0 +1,19 @@
+@model CitasMedicas.Web.Modules.CatalogoMedico.ListarEspecialidades.Especialidad
+@{
+    ViewData["Title"] = "Buscar turnos";
+}
+
+<section class="specialties-page next-step-page">
+    <a class="back-link" asp-controller="Especialidades" asp-action="Index">← Cambiar especialidad</a>
+    <p class="eyebrow">ESPECIALIDAD SELECCIONADA</p>
+    <h1>@Model.Nombre</h1>
+    <p class="page-intro">@Model.Descripcion</p>
+    <div class="next-step-card" role="status">
+        <span class="step-number">1</span>
+        <div>
+            <h2>Ahora podés buscar un turno</h2>
+            <p>La búsqueda continuará con la especialidad de @Model.Nombre.</p>
+            <span class="coming-soon">Próximamente: selección de profesional y horario</span>
+        </div>
+    </div>
+</section>
