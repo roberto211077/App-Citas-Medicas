@@ -1,4 +1,4 @@
-@model CitasMedicas.Web.Modules.CatalogoMedico.ListarEspecialidades.Especialidad
+@model CitasMedicas.Web.Modules.Agenda.BuscarTurnos.BuscarTurnosViewModel
 @{
     ViewData["Title"] = "Buscar turnos";
 }
@@ -6,14 +6,57 @@
 <section class="specialties-page next-step-page">
     <a class="back-link" asp-controller="Especialidades" asp-action="Index">← Cambiar especialidad</a>
     <p class="eyebrow">ESPECIALIDAD SELECCIONADA</p>
-    <h1>@Model.Nombre</h1>
-    <p class="page-intro">@Model.Descripcion</p>
-    <div class="next-step-card" role="status">
-        <span class="step-number">1</span>
-        <div>
-            <h2>Ahora podés buscar un turno</h2>
-            <p>La búsqueda continuará con la especialidad de @Model.Nombre.</p>
-            <span class="coming-soon">Próximamente: selección de profesional y horario</span>
+    <h1>@Model.EspecialidadNombre</h1>
+    <p class="page-intro">@Model.EspecialidadDescripcion</p>
+
+    <form class="specialty-form search-form" method="get" asp-controller="Especialidades" asp-action="BuscarTurnos">
+        <input type="hidden" name="id" value="@Model.EspecialidadId" />
+        <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
+        <div class="search-fields">
+            <div class="form-field">
+                <label asp-for="Fecha">Fecha</label>
+                <input asp-for="Fecha" type="date" class="form-input" />
+                <span asp-validation-for="Fecha" class="field-error"></span>
+            </div>
+            <div class="form-field">
+                <label asp-for="Franja">Horario</label>
+                <select asp-for="Franja" class="form-input">
+                    <option value="">Seleccioná una franja</option>
+                    <option value="Manana">Mañana (08:00 a 12:00)</option>
+                    <option value="Tarde">Tarde (12:00 a 18:00)</option>
+                </select>
+                <span asp-validation-for="Franja" class="field-error"></span>
+            </div>
         </div>
-    </div>
+        <div class="form-actions">
+            <button type="submit" class="submit-button">Buscar turnos</button>
+        </div>
+    </form>
+
+    @if (Model.BusquedaRealizada && ViewData.ModelState.IsValid)
+    {
+        @if (Model.Turnos.Count == 0)
+        {
+            <div class="empty-state search-results" role="status">
+                <h2>No hay turnos disponibles</h2>
+                <p>Probá con otra fecha o franja horaria.</p>
+            </div>
+        }
+        else
+        {
+            <section class="search-results" aria-labelledby="results-title">
+                <h2 id="results-title">Turnos disponibles</h2>
+                <ul class="appointment-list">
+                    @foreach (var turno in Model.Turnos)
+                    {
+                        <li class="appointment-card">
+                            <span class="appointment-date">@turno.Fecha.ToString("dddd d 'de' MMMM", System.Globalization.CultureInfo.GetCultureInfo("es-AR"))</span>
+                            <strong>@turno.HoraInicio.ToString("HH:mm") a @turno.HoraFin.ToString("HH:mm")</strong>
+                            <span>Dr./Dra. @turno.ProfesionalNombre</span>
+                        </li>
+                    }
+                </ul>
+            </section>
+        }
+    }
 </section>

@@ -1,5 +1,8 @@
 # Repository Guidelines
 
+## Instrucciones generales
+Nunca modificar la base de datos directamente. Debes hacerlo a través de comandos de EF Core, como crear una migración y actualizar la base de datos via dicha migración.
+
 ## Project Structure & Modules
 
 `CitasMedicas.slnx` is the solution and `CitasMedicas.Web/` is the ASP.NET Core MVC application. The web project contains startup code in `Program.cs`, MVC controllers and views, shared models, static assets in `wwwroot/`, and configuration in `appsettings*.json`. Business code belongs under `Modules/`, organized by capability (`CatalogoMedico`, `Agenda`, `Reservas`, `Clinica`). Within a module, keep `Domain`, `Application`, `Infrastructure`, and `Web` concerns local. Put complete use cases in vertical slices under `Application` (for example, `Agenda/Application/ConsultarDisponibilidad`). Keep `Shared` small and only for genuinely cross-module code. See `CONVENTIONS.md.txt` for the detailed architecture rules.
