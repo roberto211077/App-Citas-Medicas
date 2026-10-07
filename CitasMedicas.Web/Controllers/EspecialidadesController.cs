@@ -1,5 +1,6 @@
 using CitasMedicas.Web.Modules.CatalogoMedico.ListarEspecialidades;
 using CitasMedicas.Web.Modules.CatalogoMedico.CrearEspecialidad;
+using CitasMedicas.Web.Modules.Agenda.BuscarTurnos;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,7 +9,8 @@ namespace CitasMedicas.Web.Controllers;
 
 public class EspecialidadesController(
     ListarEspecialidadesUseCase listarEspecialidades,
-    CrearEspecialidadUseCase crearEspecialidad) : Controller
+    CrearEspecialidadUseCase crearEspecialidad,
+    BuscarTurnosUseCase buscarTurnos) : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
@@ -17,7 +19,11 @@ public class EspecialidadesController(
     }
 
     [HttpGet]
-    public async Task<IActionResult> BuscarTurnos(int? id, CancellationToken cancellationToken)
+    public async Task<IActionResult> BuscarTurnos(
+        int? id,
+        DateOnly? fecha,
+        FranjaHoraria? franja,
+        CancellationToken cancellationToken)
     {
         if (id is null)
         {
@@ -30,7 +36,34 @@ public class EspecialidadesController(
             return NotFound();
         }
 
-        return View(especialidad);
+        var busquedaRealizada = Request.Query.ContainsKey(nameof(fecha)) || Request.Query.ContainsKey(nameof(franja));
+        if (busquedaRealizada)
+        {
+            if (!fecha.HasValue)
+            {
+                ModelState.AddModelError(nameof(fecha), "Seleccioná una fecha válida.");
+            }
+
+            if (!franja.HasValue)
+            {
+                ModelState.AddModelError(nameof(franja), "Seleccioná una franja horaria válida.");
+            }
+        }
+
+        var model = new BuscarTurnosViewModel
+        {
+            EspecialidadId = especialidad.Id,
+            EspecialidadNombre = especialidad.Nombre,
+            EspecialidadDescripcion = especialidad.Descripcion,
+            Fecha = fecha,
+            Franja = franja,
+            BusquedaRealizada = busquedaRealizada,
+            Turnos = busquedaRealizada && fecha.HasValue && franja.HasValue && ModelState.IsValid
+                ? await buscarTurnos.EjecutarAsync(especialidad.Id, fecha.Value, franja.Value, cancellationToken)
+                : []
+        };
+
+        return View(model);
     }
 
     [HttpGet]
