@@ -31,3 +31,17 @@ No commit-message pattern is established in the available Git history. Use short
 ## Configuration & Generated Files
 
 Keep secrets and machine-specific values out of committed configuration; use development secrets or environment variables. Do not edit generated `bin/` or `obj/` output or vendor files under `wwwroot/lib/` unless dependency assets are intentionally being updated.
+
+
+## Git Workflow
+
+- El repositorio de GitHub de este proyecto es: `roberto211077/App-Citas-Medicas/issues`
+- Nunca trabajes directamente sobre `main`.
+- Antes de implementar cualquier feature, bugfix o issue, verifica la rama actual.
+- Si la rama actual es `main`, crea una nueva rama antes de realizar cambios.
+- Usa nombres descriptivos:
+    - feature/<descripcion>
+    -fix/<descripcion>
+    -refactor/<descripcion>
+- Realiza todos los commits en la nueva rama.
+- Nunca hagas push directo a `main`
