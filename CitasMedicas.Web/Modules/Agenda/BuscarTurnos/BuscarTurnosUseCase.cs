@@ -34,4 +34,14 @@ public sealed class BuscarTurnosUseCase(ClinicaDbContext dbContext)
             .OrderBy(turno => turno.HoraInicio)
             .ToListAsync(cancellationToken);
     }
+
+    public Task<TurnoDisponible?> BuscarDisponiblePorIdAsync(
+        int turnoId,
+        CancellationToken cancellationToken = default)
+    {
+        return dbContext.TurnosDisponibles
+            .AsNoTracking()
+            .Include(turno => turno.Especialidad)
+            .SingleOrDefaultAsync(turno => turno.Id == turnoId && turno.Disponible, cancellationToken);
+    }
 }

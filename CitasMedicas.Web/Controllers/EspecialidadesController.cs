@@ -67,6 +67,18 @@ public class EspecialidadesController(
     }
 
     [HttpGet]
+    public async Task<IActionResult> SeleccionarTurno(int id, CancellationToken cancellationToken)
+    {
+        var turno = await buscarTurnos.BuscarDisponiblePorIdAsync(id, cancellationToken);
+        if (turno is null)
+        {
+            return NotFound();
+        }
+
+        return View("ConfirmarTurno", turno);
+    }
+
+    [HttpGet]
     public IActionResult Crear()
     {
         return View(new CrearEspecialidadRequest());

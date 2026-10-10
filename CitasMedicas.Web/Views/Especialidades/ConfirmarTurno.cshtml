@@ -1,0 +1,18 @@
+@model CitasMedicas.Web.Modules.Agenda.BuscarTurnos.TurnoDisponible
+@{
+    ViewData["Title"] = "Confirmar turno";
+}
+
+<section class="specialties-page next-step-page">
+    <a class="back-link" asp-controller="Especialidades" asp-action="BuscarTurnos" asp-route-id="@Model.EspecialidadId">← Volver a los turnos</a>
+    <p class="eyebrow">TURNO SELECCIONADO</p>
+    <h1>Confirmá tu selección</h1>
+    <p class="page-intro">Revisá la información del turno elegido para continuar con la reserva.</p>
+
+    <article class="appointment-card" aria-label="Información del turno seleccionado">
+        <span>@Model.Especialidad.Nombre</span>
+        <strong>Dr./Dra. @Model.ProfesionalNombre</strong>
+        <span class="appointment-date">@Model.Fecha.ToString("dddd d 'de' MMMM 'de' yyyy", System.Globalization.CultureInfo.GetCultureInfo("es-AR"))</span>
+        <span>@Model.HoraInicio.ToString("HH:mm") a @Model.HoraFin.ToString("HH:mm")</span>
+    </article>
+</section>

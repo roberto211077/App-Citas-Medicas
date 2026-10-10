@@ -3,7 +3,7 @@
     ViewData["Title"] = "Buscar turnos";
 }
 
-<section class="specialties-page next-step-page">
+<section class="specialties-page next-step-page turnos-page">
     <a class="back-link" asp-controller="Especialidades" asp-action="Index">← Cambiar especialidad</a>
     <p class="eyebrow">ESPECIALIDAD SELECCIONADA</p>
     <h1>@Model.EspecialidadNombre</h1>
@@ -53,6 +53,8 @@
                             <span class="appointment-date">@turno.Fecha.ToString("dddd d 'de' MMMM", System.Globalization.CultureInfo.GetCultureInfo("es-AR"))</span>
                             <strong>@turno.HoraInicio.ToString("HH:mm") a @turno.HoraFin.ToString("HH:mm")</strong>
                             <span>Dr./Dra. @turno.ProfesionalNombre</span>
+                            <span>@Model.EspecialidadNombre</span>
+                            <a class="submit-button" asp-controller="Especialidades" asp-action="SeleccionarTurno" asp-route-id="@turno.Id">Seleccionar turno</a>
                         </li>
                     }
                 </ul>
