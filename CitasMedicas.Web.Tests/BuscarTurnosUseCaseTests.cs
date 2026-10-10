@@ -86,12 +86,77 @@ public sealed class BuscarTurnosUseCaseTests
         Assert.Empty(model.Turnos);
     }
 
+    [Fact]
+    public async Task SeleccionarTurno_Disponible_MuestraLaConfirmacionConSusDatos()
+    {
+        await using var dbContext = CrearContexto();
+        dbContext.Especialidades.Add(new Especialidad
+        {
+            Id = 1,
+            Nombre = "Cardiología",
+            Descripcion = "Atención cardiológica"
+        });
+        dbContext.TurnosDisponibles.Add(new TurnoDisponible
+        {
+            Id = 42,
+            EspecialidadId = 1,
+            ProfesionalNombre = "Ana Pérez",
+            Fecha = new DateOnly(2030, 4, 10),
+            HoraInicio = new TimeOnly(9, 0),
+            HoraFin = new TimeOnly(9, 30),
+            Disponible = true
+        });
+        await dbContext.SaveChangesAsync();
+
+        var controller = CrearController(dbContext);
+
+        var result = await controller.SeleccionarTurno(42, default);
+
+        var view = Assert.IsType<ViewResult>(result);
+        Assert.Equal("ConfirmarTurno", view.ViewName);
+        var turno = Assert.IsType<TurnoDisponible>(view.Model);
+        Assert.Equal("Cardiología", turno.Especialidad.Nombre);
+        Assert.Equal("Ana Pérez", turno.ProfesionalNombre);
+        Assert.Equal(new DateOnly(2030, 4, 10), turno.Fecha);
+        Assert.Equal(new TimeOnly(9, 0), turno.HoraInicio);
+        Assert.Equal(new TimeOnly(9, 30), turno.HoraFin);
+    }
+
+    [Fact]
+    public async Task SeleccionarTurno_InexistenteONoDisponible_DevuelveNotFound()
+    {
+        await using var dbContext = CrearContexto();
+        dbContext.Especialidades.Add(new Especialidad
+        {
+            Id = 1,
+            Nombre = "Cardiología",
+            Descripcion = "Atención cardiológica"
+        });
+        var turnoNoDisponible = Turno(1, new DateOnly(2030, 4, 10), new TimeOnly(9, 0), disponible: false);
+        turnoNoDisponible.Id = 1;
+        dbContext.TurnosDisponibles.Add(turnoNoDisponible);
+        await dbContext.SaveChangesAsync();
+
+        var controller = CrearController(dbContext);
+
+        Assert.IsType<NotFoundResult>(await controller.SeleccionarTurno(999, default));
+        Assert.IsType<NotFoundResult>(await controller.SeleccionarTurno(1, default));
+    }
+
     private static ClinicaDbContext CrearContexto()
     {
         var options = new DbContextOptionsBuilder<ClinicaDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
         return new ClinicaDbContext(options);
+    }
+
+    private static EspecialidadesController CrearController(ClinicaDbContext dbContext)
+    {
+        return new EspecialidadesController(
+            new CitasMedicas.Web.Modules.CatalogoMedico.ListarEspecialidades.ListarEspecialidadesUseCase(dbContext),
+            new CitasMedicas.Web.Modules.CatalogoMedico.CrearEspecialidad.CrearEspecialidadUseCase(dbContext),
+            new BuscarTurnosUseCase(dbContext));
     }
 
     private static TurnoDisponible Turno(int especialidadId, DateOnly fecha, TimeOnly hora, bool disponible) => new()
