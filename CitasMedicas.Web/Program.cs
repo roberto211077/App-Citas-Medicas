@@ -14,6 +14,9 @@ builder.Services.AddDbContext<CitasMedicas.Web.Modules.CatalogoMedico.Infrastruc
     options.UseSqlServer(connectionString));
 builder.Services.AddScoped<CitasMedicas.Web.Modules.CatalogoMedico.ListarEspecialidades.ListarEspecialidadesUseCase>();
 builder.Services.AddScoped<CitasMedicas.Web.Modules.CatalogoMedico.CrearEspecialidad.CrearEspecialidadUseCase>();
+builder.Services.AddScoped<CitasMedicas.Web.Modules.CatalogoMedico.RegistrarMedico.RegistrarMedicoUseCase>();
+builder.Services.AddScoped<CitasMedicas.Web.Modules.CatalogoMedico.ListarMedicos.ListarMedicosUseCase>();
+builder.Services.AddScoped<CitasMedicas.Web.Modules.CatalogoMedico.EditarMedico.EditarMedicoUseCase>();
 builder.Services.AddScoped<CitasMedicas.Web.Modules.Agenda.BuscarTurnos.BuscarTurnosUseCase>();
 
 var app = builder.Build();

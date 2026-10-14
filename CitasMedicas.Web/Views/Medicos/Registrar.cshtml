@@ -1,0 +1,41 @@
+@model CitasMedicas.Web.Modules.CatalogoMedico.RegistrarMedico.RegistrarMedicoRequest
+@{
+    ViewData["Title"] = "Registrar médico";
+}
+
+<section class="specialties-page form-page">
+    <div class="page-heading">
+        <p class="eyebrow">CATÁLOGO DE LA CLÍNICA</p>
+        <h1>Registrar médico</h1>
+        <p class="page-intro">Ingresá el nombre y la especialidad para agregar un médico al catálogo.</p>
+    </div>
+
+    @if (TempData["Mensaje"] is string mensaje)
+    {
+        <div class="success-message" role="status">@mensaje</div>
+    }
+
+    <form asp-controller="Medicos" asp-action="Registrar" method="post" class="specialty-form">
+        <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
+        <div class="form-field">
+            <label asp-for="Nombre"></label>
+            <input asp-for="Nombre" class="form-input" autocomplete="name" maxlength="150" placeholder="Ej.: Ana Pérez" />
+            <span asp-validation-for="Nombre" class="field-error"></span>
+        </div>
+        <div class="form-field">
+            <label asp-for="EspecialidadId"></label>
+            <select asp-for="EspecialidadId" asp-items="ViewBag.Especialidades" class="form-input">
+                <option value="0">Seleccioná una especialidad</option>
+            </select>
+            <span asp-validation-for="EspecialidadId" class="field-error"></span>
+        </div>
+        <div class="form-actions">
+            <a class="secondary-link" asp-controller="Especialidades" asp-action="Index">Cancelar</a>
+            <button type="submit" class="submit-button">Guardar médico</button>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

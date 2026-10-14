@@ -1,0 +1,38 @@
+@model CitasMedicas.Web.Modules.CatalogoMedico.EditarMedico.EditarMedicoRequest
+@{
+    ViewData["Title"] = "Editar médico";
+}
+
+<section class="specialties-page form-page">
+    <a class="back-link" asp-controller="Medicos" asp-action="Index">← Volver a médicos</a>
+    <div class="page-heading">
+        <p class="eyebrow">CATÁLOGO DE LA CLÍNICA</p>
+        <h1>Editar médico</h1>
+        <p class="page-intro">Actualizá el nombre o la especialidad del médico.</p>
+    </div>
+
+    <form asp-controller="Medicos" asp-action="Editar" asp-route-id="@Model.Id" method="post" class="specialty-form">
+        <input asp-for="Id" type="hidden" />
+        <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
+        <div class="form-field">
+            <label asp-for="Nombre"></label>
+            <input asp-for="Nombre" class="form-input" autocomplete="name" maxlength="150" />
+            <span asp-validation-for="Nombre" class="field-error"></span>
+        </div>
+        <div class="form-field">
+            <label asp-for="EspecialidadId"></label>
+            <select asp-for="EspecialidadId" asp-items="ViewBag.Especialidades" class="form-input">
+                <option value="0">Seleccioná una especialidad</option>
+            </select>
+            <span asp-validation-for="EspecialidadId" class="field-error"></span>
+        </div>
+        <div class="form-actions">
+            <a class="secondary-link" asp-controller="Medicos" asp-action="Index">Cancelar</a>
+            <button type="submit" class="submit-button">Guardar cambios</button>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -7,6 +7,7 @@ namespace CitasMedicas.Web.Modules.CatalogoMedico.Infrastructure;
 public sealed class ClinicaDbContext(DbContextOptions<ClinicaDbContext> options) : DbContext(options)
 {
     public DbSet<Especialidad> Especialidades => Set<Especialidad>();
+    public DbSet<Medico> Medicos => Set<Medico>();
     public DbSet<TurnoDisponible> TurnosDisponibles => Set<TurnoDisponible>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -18,6 +19,18 @@ public sealed class ClinicaDbContext(DbContextOptions<ClinicaDbContext> options)
             entity.Property(especialidad => especialidad.Id).UseIdentityColumn(seed: 1, increment: 1);
             entity.Property(especialidad => especialidad.Nombre).HasMaxLength(100).IsRequired();
             entity.Property(especialidad => especialidad.Descripcion).HasMaxLength(300).IsRequired();
+        });
+
+        modelBuilder.Entity<Medico>(entity =>
+        {
+            entity.ToTable("Medicos");
+            entity.HasKey(medico => medico.Id);
+            entity.Property(medico => medico.Id).UseIdentityColumn();
+            entity.Property(medico => medico.Nombre).HasMaxLength(150).IsRequired();
+            entity.HasOne(medico => medico.Especialidad)
+                .WithMany()
+                .HasForeignKey(medico => medico.EspecialidadId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<TurnoDisponible>(entity =>
@@ -33,6 +46,10 @@ public sealed class ClinicaDbContext(DbContextOptions<ClinicaDbContext> options)
             entity.HasOne(turno => turno.Especialidad)
                 .WithMany()
                 .HasForeignKey(turno => turno.EspecialidadId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(turno => turno.Medico)
+                .WithMany()
+                .HasForeignKey(turno => turno.MedicoId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
     }
