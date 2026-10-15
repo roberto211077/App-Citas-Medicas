@@ -19,8 +19,8 @@ public sealed class BuscarTurnosUseCase(ClinicaDbContext dbContext)
     {
         var (desde, hasta) = franja switch
         {
-            FranjaHoraria.Manana => (new TimeOnly(8, 0), new TimeOnly(12, 0)),
-            FranjaHoraria.Tarde => (new TimeOnly(12, 0), new TimeOnly(18, 0)),
+            FranjaHoraria.Manana => (new TimeOnly(8, 0), new TimeOnly(14, 0)),
+            FranjaHoraria.Tarde => (new TimeOnly(15, 0), new TimeOnly(22, 0)),
             _ => throw new ArgumentOutOfRangeException(nameof(franja))
         };
 

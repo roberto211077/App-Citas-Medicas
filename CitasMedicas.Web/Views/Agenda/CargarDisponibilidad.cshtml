@@ -1,0 +1,47 @@
+@model CitasMedicas.Web.Modules.Agenda.CargarDisponibilidad.CargarDisponibilidadRequest
+@{
+    ViewData["Title"] = "Cargar disponibilidad";
+}
+
+<section class="specialties-page form-page">
+    <div class="page-heading">
+        <p class="eyebrow">AGENDA DE LA CLÍNICA</p>
+        <h1>Cargar disponibilidad</h1>
+        <p class="page-intro">Seleccioná un médico y definí cuándo estará disponible para atender.</p>
+    </div>
+
+    @if (TempData["Mensaje"] is string mensaje)
+    {
+        <div class="success-message" role="status">@mensaje</div>
+    }
+
+    <form asp-controller="Agenda" asp-action="CargarDisponibilidad" method="post" class="specialty-form">
+        <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
+        <div class="form-field">
+            <label asp-for="MedicoId"></label>
+            <select asp-for="MedicoId" asp-items="ViewBag.Medicos" class="form-input">
+                <option value="0">Seleccioná un médico</option>
+            </select>
+            <span asp-validation-for="MedicoId" class="field-error"></span>
+        </div>
+        <div class="form-field">
+            <label asp-for="Fecha"></label>
+            <input asp-for="Fecha" type="date" class="form-input" />
+            <span asp-validation-for="Fecha" class="field-error"></span>
+        </div>
+        <div class="form-field">
+            <label asp-for="HoraInicio"></label>
+            <input asp-for="HoraInicio" type="time" class="form-input" />
+            <span asp-validation-for="HoraInicio" class="field-error"></span>
+            <small>La duración del turno es de 30 minutos.</small>
+        </div>
+        <div class="form-actions">
+            <a class="secondary-link" asp-controller="Especialidades" asp-action="Index">Cancelar</a>
+            <button type="submit" class="submit-button">Guardar disponibilidad</button>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
