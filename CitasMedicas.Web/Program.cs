@@ -18,6 +18,7 @@ builder.Services.AddScoped<CitasMedicas.Web.Modules.CatalogoMedico.RegistrarMedi
 builder.Services.AddScoped<CitasMedicas.Web.Modules.CatalogoMedico.ListarMedicos.ListarMedicosUseCase>();
 builder.Services.AddScoped<CitasMedicas.Web.Modules.CatalogoMedico.EditarMedico.EditarMedicoUseCase>();
 builder.Services.AddScoped<CitasMedicas.Web.Modules.Agenda.BuscarTurnos.BuscarTurnosUseCase>();
+builder.Services.AddScoped<CitasMedicas.Web.Modules.Agenda.CargarDisponibilidad.CargarDisponibilidadUseCase>();
 
 var app = builder.Build();
 
