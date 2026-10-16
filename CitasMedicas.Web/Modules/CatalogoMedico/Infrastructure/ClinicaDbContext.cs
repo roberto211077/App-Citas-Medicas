@@ -1,5 +1,6 @@
 using CitasMedicas.Web.Modules.CatalogoMedico.ListarEspecialidades;
 using CitasMedicas.Web.Modules.Agenda.BuscarTurnos;
+using CitasMedicas.Web.Modules.Reservas.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace CitasMedicas.Web.Modules.CatalogoMedico.Infrastructure;
@@ -9,6 +10,8 @@ public sealed class ClinicaDbContext(DbContextOptions<ClinicaDbContext> options)
     public DbSet<Especialidad> Especialidades => Set<Especialidad>();
     public DbSet<Medico> Medicos => Set<Medico>();
     public DbSet<TurnoDisponible> TurnosDisponibles => Set<TurnoDisponible>();
+    public DbSet<Paciente> Pacientes => Set<Paciente>();
+    public DbSet<Reserva> Reservas => Set<Reserva>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -50,6 +53,35 @@ public sealed class ClinicaDbContext(DbContextOptions<ClinicaDbContext> options)
             entity.HasOne(turno => turno.Medico)
                 .WithMany()
                 .HasForeignKey(turno => turno.MedicoId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Paciente>(entity =>
+        {
+            entity.ToTable("Pacientes");
+            entity.HasKey(paciente => paciente.Id);
+            entity.Property(paciente => paciente.Id).UseIdentityColumn();
+            entity.Property(paciente => paciente.Dni).HasMaxLength(20).IsRequired();
+            entity.HasIndex(paciente => paciente.Dni).IsUnique();
+            entity.Property(paciente => paciente.Nombre).HasMaxLength(100).IsRequired();
+            entity.Property(paciente => paciente.Apellido).HasMaxLength(100).IsRequired();
+            entity.Property(paciente => paciente.Telefono).HasMaxLength(30).IsRequired();
+        });
+
+        modelBuilder.Entity<Reserva>(entity =>
+        {
+            entity.ToTable("Reservas");
+            entity.HasKey(reserva => reserva.Id);
+            entity.Property(reserva => reserva.Id).UseIdentityColumn();
+            entity.Property(reserva => reserva.FechaCreacionUtc).IsRequired();
+            entity.HasIndex(reserva => reserva.TurnoDisponibleId).IsUnique();
+            entity.HasOne(reserva => reserva.Paciente)
+                .WithMany()
+                .HasForeignKey(reserva => reserva.PacienteId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(reserva => reserva.TurnoDisponible)
+                .WithMany()
+                .HasForeignKey(reserva => reserva.TurnoDisponibleId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
     }

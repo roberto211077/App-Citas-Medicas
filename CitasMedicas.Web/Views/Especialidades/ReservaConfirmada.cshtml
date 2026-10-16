@@ -1,0 +1,19 @@
+@model CitasMedicas.Web.Modules.Reservas.Application.ReservarTurno.ReservaConfirmadaViewModel
+@{
+    ViewData["Title"] = "Reserva confirmada";
+}
+
+<section class="specialties-page next-step-page">
+    <p class="eyebrow">RESERVA CONFIRMADA</p>
+    <h1>¡Tu turno está reservado, @Model.Reserva.Paciente.Nombre!</h1>
+    <p class="page-intro">Guardamos tu reserva y tus datos personales.</p>
+    <article class="appointment-card" aria-label="Datos de la reserva">
+        <span>@Model.Reserva.TurnoDisponible.Especialidad.Nombre</span>
+        <strong>Dr./Dra. @Model.Reserva.TurnoDisponible.ProfesionalNombre</strong>
+        <span class="appointment-date">@Model.Reserva.TurnoDisponible.Fecha.ToString("dddd d 'de' MMMM 'de' yyyy", System.Globalization.CultureInfo.GetCultureInfo("es-AR"))</span>
+        <span>@Model.Reserva.TurnoDisponible.HoraInicio.ToString("HH:mm") a @Model.Reserva.TurnoDisponible.HoraFin.ToString("HH:mm")</span>
+        <span>Paciente: @Model.Reserva.Paciente.Nombre @Model.Reserva.Paciente.Apellido</span>
+        <span>DNI: @Model.Reserva.Paciente.Dni · Teléfono: @Model.Reserva.Paciente.Telefono</span>
+    </article>
+    <a class="submit-button" asp-controller="Especialidades" asp-action="Index">Volver a especialidades</a>
+</section>
