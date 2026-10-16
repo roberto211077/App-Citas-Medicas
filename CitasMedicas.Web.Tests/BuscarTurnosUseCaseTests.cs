@@ -2,6 +2,7 @@ using CitasMedicas.Web.Modules.Agenda.BuscarTurnos;
 using CitasMedicas.Web.Modules.CatalogoMedico.Infrastructure;
 using CitasMedicas.Web.Modules.CatalogoMedico.ListarEspecialidades;
 using CitasMedicas.Web.Controllers;
+using CitasMedicas.Web.Modules.Reservas.Application.ReservarTurno;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -65,7 +66,8 @@ public sealed class BuscarTurnosUseCaseTests
         var controller = new EspecialidadesController(
             new CitasMedicas.Web.Modules.CatalogoMedico.ListarEspecialidades.ListarEspecialidadesUseCase(dbContext),
             new CitasMedicas.Web.Modules.CatalogoMedico.CrearEspecialidad.CrearEspecialidadUseCase(dbContext),
-            new BuscarTurnosUseCase(dbContext))
+            new BuscarTurnosUseCase(dbContext),
+            new ReservarTurnoUseCase(dbContext))
         {
             ControllerContext = new ControllerContext
             {
@@ -112,11 +114,12 @@ public sealed class BuscarTurnosUseCaseTests
 
         var controller = CrearController(dbContext);
 
-        var result = await controller.SeleccionarTurno(42, default);
+        var result = await controller.SeleccionarTurno(42);
 
         var view = Assert.IsType<ViewResult>(result);
         Assert.Equal("ConfirmarTurno", view.ViewName);
-        var turno = Assert.IsType<TurnoDisponible>(view.Model);
+        var modelo = Assert.IsType<ReservarTurnoViewModel>(view.Model);
+        var turno = modelo.Turno;
         Assert.Equal("Cardiología", turno.Especialidad.Nombre);
         Assert.Equal("Ana Pérez", turno.ProfesionalNombre);
         Assert.Equal(new DateOnly(2030, 4, 10), turno.Fecha);
@@ -141,8 +144,8 @@ public sealed class BuscarTurnosUseCaseTests
 
         var controller = CrearController(dbContext);
 
-        Assert.IsType<NotFoundResult>(await controller.SeleccionarTurno(999, default));
-        Assert.IsType<NotFoundResult>(await controller.SeleccionarTurno(1, default));
+        Assert.IsType<NotFoundResult>(await controller.SeleccionarTurno(999));
+        Assert.IsType<NotFoundResult>(await controller.SeleccionarTurno(1));
     }
 
     private static ClinicaDbContext CrearContexto()
@@ -158,7 +161,8 @@ public sealed class BuscarTurnosUseCaseTests
         return new EspecialidadesController(
             new CitasMedicas.Web.Modules.CatalogoMedico.ListarEspecialidades.ListarEspecialidadesUseCase(dbContext),
             new CitasMedicas.Web.Modules.CatalogoMedico.CrearEspecialidad.CrearEspecialidadUseCase(dbContext),
-            new BuscarTurnosUseCase(dbContext));
+            new BuscarTurnosUseCase(dbContext),
+            new ReservarTurnoUseCase(dbContext));
     }
 
     private static TurnoDisponible Turno(int especialidadId, DateOnly fecha, TimeOnly hora, bool disponible) => new()

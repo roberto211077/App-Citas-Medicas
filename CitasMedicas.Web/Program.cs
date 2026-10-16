@@ -19,6 +19,7 @@ builder.Services.AddScoped<CitasMedicas.Web.Modules.CatalogoMedico.ListarMedicos
 builder.Services.AddScoped<CitasMedicas.Web.Modules.CatalogoMedico.EditarMedico.EditarMedicoUseCase>();
 builder.Services.AddScoped<CitasMedicas.Web.Modules.Agenda.BuscarTurnos.BuscarTurnosUseCase>();
 builder.Services.AddScoped<CitasMedicas.Web.Modules.Agenda.CargarDisponibilidad.CargarDisponibilidadUseCase>();
+builder.Services.AddScoped<CitasMedicas.Web.Modules.Reservas.Application.ReservarTurno.ReservarTurnoUseCase>();
 
 var app = builder.Build();
 
@@ -26,7 +27,7 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnet/core/host-and-deploy/aspnet-core-middleware?view=aspnetcore-10.0.
     app.UseHsts();
 }
 

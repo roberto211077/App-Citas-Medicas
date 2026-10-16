@@ -1,6 +1,7 @@
 using CitasMedicas.Web.Modules.CatalogoMedico.ListarEspecialidades;
 using CitasMedicas.Web.Modules.CatalogoMedico.CrearEspecialidad;
 using CitasMedicas.Web.Modules.Agenda.BuscarTurnos;
+using CitasMedicas.Web.Modules.Reservas.Application.ReservarTurno;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +11,8 @@ namespace CitasMedicas.Web.Controllers;
 public class EspecialidadesController(
     ListarEspecialidadesUseCase listarEspecialidades,
     CrearEspecialidadUseCase crearEspecialidad,
-    BuscarTurnosUseCase buscarTurnos) : Controller
+    BuscarTurnosUseCase buscarTurnos,
+    ReservarTurnoUseCase reservarTurno) : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
@@ -67,15 +69,86 @@ public class EspecialidadesController(
     }
 
     [HttpGet]
-    public async Task<IActionResult> SeleccionarTurno(int id, CancellationToken cancellationToken)
+    public async Task<IActionResult> SeleccionarTurno(int id, string? dni = null, CancellationToken cancellationToken = default)
     {
-        var turno = await buscarTurnos.BuscarDisponiblePorIdAsync(id, cancellationToken);
+        var turno = await reservarTurno.BuscarTurnoDisponibleAsync(id, cancellationToken);
         if (turno is null)
         {
             return NotFound();
         }
 
-        return View("ConfirmarTurno", turno);
+        var request = new ReservarTurnoRequest { TurnoDisponibleId = id, Dni = dni?.Trim() ?? string.Empty };
+        var paciente = string.IsNullOrWhiteSpace(request.Dni)
+            ? null
+            : await reservarTurno.BuscarPacientePorDniAsync(request.Dni, cancellationToken);
+
+        if (paciente is not null)
+        {
+            request.Nombre = paciente.Nombre;
+            request.Apellido = paciente.Apellido;
+            request.Telefono = paciente.Telefono;
+        }
+
+        return View("ConfirmarTurno", new ReservarTurnoViewModel
+        {
+            Turno = turno,
+            Request = request,
+            PacienteEncontrado = paciente
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Reservar(ReservarTurnoRequest request, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            var turno = await reservarTurno.BuscarTurnoDisponibleAsync(request.TurnoDisponibleId, cancellationToken);
+            if (turno is null)
+            {
+                return NotFound();
+            }
+
+            var paciente = string.IsNullOrWhiteSpace(request.Dni)
+                ? null
+                : await reservarTurno.BuscarPacientePorDniAsync(request.Dni, cancellationToken);
+            return View("ConfirmarTurno", new ReservarTurnoViewModel
+            {
+                Turno = turno,
+                Request = request,
+                PacienteEncontrado = paciente
+            });
+        }
+
+        var resultado = await reservarTurno.EjecutarAsync(request, cancellationToken);
+        if (!resultado.Exitoso)
+        {
+            var turno = await reservarTurno.BuscarTurnoDisponibleAsync(request.TurnoDisponibleId, cancellationToken);
+            if (turno is null)
+            {
+                return View("TurnoNoDisponible");
+            }
+
+            var paciente = await reservarTurno.BuscarPacientePorDniAsync(request.Dni, cancellationToken);
+            return View("ConfirmarTurno", new ReservarTurnoViewModel
+            {
+                Turno = turno,
+                Request = request,
+                PacienteEncontrado = paciente,
+                Mensaje = resultado.Mensaje
+            });
+        }
+
+        return RedirectToAction(nameof(ReservaConfirmada), new { id = resultado.ReservaId });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ReservaConfirmada(int id, CancellationToken cancellationToken)
+    {
+        var reserva = await reservarTurno.BuscarReservaAsync(id, cancellationToken);
+        return reserva is null
+            ? NotFound()
+            : View(new ReservaConfirmadaViewModel(reserva));
     }
 
     [HttpGet]

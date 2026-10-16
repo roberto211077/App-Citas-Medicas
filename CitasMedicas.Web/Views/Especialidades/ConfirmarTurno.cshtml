@@ -1,18 +1,61 @@
-@model CitasMedicas.Web.Modules.Agenda.BuscarTurnos.TurnoDisponible
+@model CitasMedicas.Web.Modules.Reservas.Application.ReservarTurno.ReservarTurnoViewModel
 @{
     ViewData["Title"] = "Confirmar turno";
 }
 
 <section class="specialties-page next-step-page">
-    <a class="back-link" asp-controller="Especialidades" asp-action="BuscarTurnos" asp-route-id="@Model.EspecialidadId">← Volver a los turnos</a>
+    <a class="back-link" asp-controller="Especialidades" asp-action="BuscarTurnos" asp-route-id="@Model.Turno.EspecialidadId">← Volver a los turnos</a>
     <p class="eyebrow">TURNO SELECCIONADO</p>
     <h1>Confirmá tu selección</h1>
-    <p class="page-intro">Revisá la información del turno elegido para continuar con la reserva.</p>
+    <p class="page-intro">Revisá el turno e ingresá los datos personales para completar la reserva.</p>
 
     <article class="appointment-card" aria-label="Información del turno seleccionado">
-        <span>@Model.Especialidad.Nombre</span>
-        <strong>Dr./Dra. @Model.ProfesionalNombre</strong>
-        <span class="appointment-date">@Model.Fecha.ToString("dddd d 'de' MMMM 'de' yyyy", System.Globalization.CultureInfo.GetCultureInfo("es-AR"))</span>
-        <span>@Model.HoraInicio.ToString("HH:mm") a @Model.HoraFin.ToString("HH:mm")</span>
+        <span>@Model.Turno.Especialidad.Nombre</span>
+        <strong>Dr./Dra. @Model.Turno.ProfesionalNombre</strong>
+        <span class="appointment-date">@Model.Turno.Fecha.ToString("dddd d 'de' MMMM 'de' yyyy", System.Globalization.CultureInfo.GetCultureInfo("es-AR"))</span>
+        <span>@Model.Turno.HoraInicio.ToString("HH:mm") a @Model.Turno.HoraFin.ToString("HH:mm")</span>
     </article>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Mensaje))
+    {
+        <div class="validation-summary-errors" role="alert">@Model.Mensaje</div>
+    }
+
+    <form class="specialty-form" method="get" asp-controller="Especialidades" asp-action="SeleccionarTurno">
+        <input type="hidden" name="id" value="@Model.Turno.Id" />
+        <div class="form-field">
+            <label for="dni">DNI</label>
+            <input id="dni" name="dni" value="@Model.Request.Dni" autocomplete="off" required maxlength="20" />
+        </div>
+        <button class="submit-button" type="submit">Buscar datos por DNI</button>
+    </form>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Request.Dni))
+    {
+        <form class="specialty-form" method="post" asp-controller="Especialidades" asp-action="Reservar">
+            <input asp-for="Request.TurnoDisponibleId" type="hidden" />
+            <input asp-for="Request.Dni" type="hidden" />
+            <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+            @if (Model.PacienteEncontrado is not null)
+            {
+                <p>Encontramos tus datos asociados a este DNI.</p>
+            }
+            <div class="form-field">
+                <label asp-for="Request.Nombre">Nombre</label>
+                <input asp-for="Request.Nombre" autocomplete="given-name" readonly="@(Model.PacienteEncontrado is not null)" />
+                <span asp-validation-for="Request.Nombre" class="field-validation-error"></span>
+            </div>
+            <div class="form-field">
+                <label asp-for="Request.Apellido">Apellido</label>
+                <input asp-for="Request.Apellido" autocomplete="family-name" readonly="@(Model.PacienteEncontrado is not null)" />
+                <span asp-validation-for="Request.Apellido" class="field-validation-error"></span>
+            </div>
+            <div class="form-field">
+                <label asp-for="Request.Telefono">Teléfono</label>
+                <input asp-for="Request.Telefono" autocomplete="tel" readonly="@(Model.PacienteEncontrado is not null)" />
+                <span asp-validation-for="Request.Telefono" class="field-validation-error"></span>
+            </div>
+            <button class="submit-button" type="submit">Confirmar reserva</button>
+        </form>
+    }
 </section>
