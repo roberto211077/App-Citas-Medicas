@@ -27,7 +27,7 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://learn.microsoft.com/aspnet/core/fundamentals/servers/?view=aspnetcore-10.0&tabs=windows#configure-the-aspnet-core-module
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnet/core/host-and-deploy/aspnet-core-middleware?view=aspnetcore-10.0.
     app.UseHsts();
 }
 
