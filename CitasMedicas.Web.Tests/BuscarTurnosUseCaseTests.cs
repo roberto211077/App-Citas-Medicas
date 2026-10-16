@@ -21,14 +21,16 @@ public sealed class BuscarTurnosUseCaseTests
             Turno(1, new DateOnly(2030, 4, 10), new TimeOnly(10, 0), disponible: false),
             Turno(2, new DateOnly(2030, 4, 10), new TimeOnly(9, 30), disponible: true),
             Turno(1, new DateOnly(2030, 4, 11), new TimeOnly(9, 30), disponible: true),
-            Turno(1, new DateOnly(2030, 4, 10), new TimeOnly(12, 0), disponible: true));
+            Turno(1, new DateOnly(2030, 4, 10), new TimeOnly(13, 30), disponible: true),
+            Turno(1, new DateOnly(2030, 4, 10), new TimeOnly(14, 0), disponible: true));
         await dbContext.SaveChangesAsync();
 
         var resultados = await new BuscarTurnosUseCase(dbContext).EjecutarAsync(
             1, new DateOnly(2030, 4, 10), FranjaHoraria.Manana);
 
-        var turno = Assert.Single(resultados);
-        Assert.Equal(new TimeOnly(9, 0), turno.HoraInicio);
+        Assert.Equal(2, resultados.Count);
+        Assert.Equal(new TimeOnly(9, 0), resultados[0].HoraInicio);
+        Assert.Equal(new TimeOnly(13, 30), resultados[1].HoraInicio);
     }
 
     [Fact]
@@ -37,15 +39,15 @@ public sealed class BuscarTurnosUseCaseTests
         await using var dbContext = CrearContexto();
         dbContext.TurnosDisponibles.AddRange(
             Turno(1, new DateOnly(2030, 4, 10), new TimeOnly(17, 0), disponible: true),
-            Turno(1, new DateOnly(2030, 4, 10), new TimeOnly(12, 0), disponible: true),
-            Turno(1, new DateOnly(2030, 4, 10), new TimeOnly(18, 0), disponible: true));
+            Turno(1, new DateOnly(2030, 4, 10), new TimeOnly(15, 0), disponible: true),
+            Turno(1, new DateOnly(2030, 4, 10), new TimeOnly(22, 0), disponible: true));
         await dbContext.SaveChangesAsync();
 
         var resultados = await new BuscarTurnosUseCase(dbContext).EjecutarAsync(
             1, new DateOnly(2030, 4, 10), FranjaHoraria.Tarde);
 
         Assert.Equal(2, resultados.Count);
-        Assert.Equal(new TimeOnly(12, 0), resultados[0].HoraInicio);
+        Assert.Equal(new TimeOnly(15, 0), resultados[0].HoraInicio);
         Assert.Equal(new TimeOnly(17, 0), resultados[1].HoraInicio);
     }
 
