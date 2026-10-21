@@ -1,6 +1,7 @@
 using CitasMedicas.Web.Modules.Agenda.BuscarTurnos;
 using CitasMedicas.Web.Modules.CatalogoMedico.Infrastructure;
 using CitasMedicas.Web.Modules.CatalogoMedico.ListarEspecialidades;
+using CitasMedicas.Web.Modules.Reservas.ReservarTurno;
 using CitasMedicas.Web.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
@@ -15,6 +16,7 @@ public sealed class BuscarTurnosUseCaseTests
     public async Task EjecutarAsync_FiltraPorEspecialidadFechaFranjaYDisponibilidad()
     {
         await using var dbContext = CrearContexto();
+        dbContext.Medicos.Add(new Medico { Id = 7, Nombre = "Ana Pérez", EspecialidadId = 1 });
         dbContext.TurnosDisponibles.AddRange(
             Turno(1, new DateOnly(2030, 4, 10), new TimeOnly(9, 0), disponible: true),
             Turno(1, new DateOnly(2030, 4, 10), new TimeOnly(10, 0), disponible: false),
@@ -36,6 +38,7 @@ public sealed class BuscarTurnosUseCaseTests
     public async Task EjecutarAsync_DevuelveTurnosDeLaTardeEnOrden()
     {
         await using var dbContext = CrearContexto();
+        dbContext.Medicos.Add(new Medico { Id = 7, Nombre = "Ana Pérez", EspecialidadId = 1 });
         dbContext.TurnosDisponibles.AddRange(
             Turno(1, new DateOnly(2030, 4, 10), new TimeOnly(17, 0), disponible: true),
             Turno(1, new DateOnly(2030, 4, 10), new TimeOnly(15, 0), disponible: true),
@@ -98,11 +101,12 @@ public sealed class BuscarTurnosUseCaseTests
             Nombre = "Cardiología",
             Descripcion = "Atención cardiológica"
         });
+        dbContext.Medicos.Add(new Medico { Id = 7, Nombre = "Ana Pérez", EspecialidadId = 1 });
         dbContext.TurnosDisponibles.Add(new TurnoDisponible
         {
             Id = 42,
             EspecialidadId = 1,
-            ProfesionalNombre = "Ana Pérez",
+            MedicoId = 7,
             Fecha = new DateOnly(2030, 4, 10),
             HoraInicio = new TimeOnly(9, 0),
             HoraFin = new TimeOnly(9, 30),
@@ -116,9 +120,10 @@ public sealed class BuscarTurnosUseCaseTests
 
         var view = Assert.IsType<ViewResult>(result);
         Assert.Equal("ConfirmarTurno", view.ViewName);
-        var turno = Assert.IsType<TurnoDisponible>(view.Model);
+        var request = Assert.IsType<ReservarTurnoRequest>(view.Model);
+        var turno = Assert.IsType<TurnoDisponible>(request.Turno);
         Assert.Equal("Cardiología", turno.Especialidad.Nombre);
-        Assert.Equal("Ana Pérez", turno.ProfesionalNombre);
+        Assert.Equal("Ana Pérez", turno.Medico.Nombre);
         Assert.Equal(new DateOnly(2030, 4, 10), turno.Fecha);
         Assert.Equal(new TimeOnly(9, 0), turno.HoraInicio);
         Assert.Equal(new TimeOnly(9, 30), turno.HoraFin);
@@ -164,7 +169,7 @@ public sealed class BuscarTurnosUseCaseTests
     private static TurnoDisponible Turno(int especialidadId, DateOnly fecha, TimeOnly hora, bool disponible) => new()
     {
         EspecialidadId = especialidadId,
-        ProfesionalNombre = "Profesional de prueba",
+        MedicoId = 7,
         Fecha = fecha,
         HoraInicio = hora,
         HoraFin = hora.AddMinutes(30),

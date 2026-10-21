@@ -52,7 +52,7 @@
                         <li class="appointment-card">
                             <span class="appointment-date">@turno.Fecha.ToString("dddd d 'de' MMMM", System.Globalization.CultureInfo.GetCultureInfo("es-AR"))</span>
                             <strong>@turno.HoraInicio.ToString("HH:mm") a @turno.HoraFin.ToString("HH:mm")</strong>
-                            <span>Dr./Dra. @turno.ProfesionalNombre</span>
+                            <span>Dr./Dra. @turno.Medico.Nombre</span>
                             <span>@Model.EspecialidadNombre</span>
                             <a class="submit-button" asp-controller="Especialidades" asp-action="SeleccionarTurno" asp-route-id="@turno.Id">Seleccionar turno</a>
                         </li>

@@ -26,6 +26,7 @@ public sealed class BuscarTurnosUseCase(ClinicaDbContext dbContext)
 
         return dbContext.TurnosDisponibles
             .AsNoTracking()
+            .Include(turno => turno.Medico)
             .Where(turno => turno.EspecialidadId == especialidadId
                 && turno.Fecha == fecha
                 && turno.HoraInicio >= desde
@@ -42,6 +43,7 @@ public sealed class BuscarTurnosUseCase(ClinicaDbContext dbContext)
         return dbContext.TurnosDisponibles
             .AsNoTracking()
             .Include(turno => turno.Especialidad)
+            .Include(turno => turno.Medico)
             .SingleOrDefaultAsync(turno => turno.Id == turnoId && turno.Disponible, cancellationToken);
     }
 }

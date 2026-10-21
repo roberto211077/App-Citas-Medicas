@@ -45,13 +45,8 @@ namespace CitasMedicas.Web.Modules.CatalogoMedico.Infrastructure.Migrations
                     b.Property<TimeOnly>("HoraInicio")
                         .HasColumnType("time");
 
-                    b.Property<int?>("MedicoId")
+                    b.Property<int>("MedicoId")
                         .HasColumnType("int");
-
-                    b.Property<string>("ProfesionalNombre")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
 
                     b.HasKey("Id");
 
@@ -108,6 +103,70 @@ namespace CitasMedicas.Web.Modules.CatalogoMedico.Infrastructure.Migrations
                     b.ToTable("Medicos", (string)null);
                 });
 
+            modelBuilder.Entity("CitasMedicas.Web.Modules.Reservas.Domain.Paciente", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Apellido")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Correo")
+                        .HasMaxLength(254)
+                        .HasColumnType("nvarchar(254)");
+
+                    b.Property<string>("Dni")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Telefono")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Pacientes", (string)null);
+                });
+
+            modelBuilder.Entity("CitasMedicas.Web.Modules.Reservas.Domain.Reserva", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("FechaCreacionUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PacienteId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TurnoDisponibleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PacienteId");
+
+                    b.HasIndex("TurnoDisponibleId")
+                        .IsUnique();
+
+                    b.ToTable("Reservas", (string)null);
+                });
+
             modelBuilder.Entity("CitasMedicas.Web.Modules.Agenda.BuscarTurnos.TurnoDisponible", b =>
                 {
                     b.HasOne("CitasMedicas.Web.Modules.CatalogoMedico.ListarEspecialidades.Especialidad", "Especialidad")
@@ -119,7 +178,8 @@ namespace CitasMedicas.Web.Modules.CatalogoMedico.Infrastructure.Migrations
                     b.HasOne("CitasMedicas.Web.Modules.CatalogoMedico.ListarEspecialidades.Medico", "Medico")
                         .WithMany()
                         .HasForeignKey("MedicoId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Especialidad");
 
@@ -135,6 +195,25 @@ namespace CitasMedicas.Web.Modules.CatalogoMedico.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Especialidad");
+                });
+
+            modelBuilder.Entity("CitasMedicas.Web.Modules.Reservas.Domain.Reserva", b =>
+                {
+                    b.HasOne("CitasMedicas.Web.Modules.Reservas.Domain.Paciente", "Paciente")
+                        .WithMany()
+                        .HasForeignKey("PacienteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CitasMedicas.Web.Modules.Agenda.BuscarTurnos.TurnoDisponible", "TurnoDisponible")
+                        .WithOne()
+                        .HasForeignKey("CitasMedicas.Web.Modules.Reservas.Domain.Reserva", "TurnoDisponibleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Paciente");
+
+                    b.Navigation("TurnoDisponible");
                 });
 #pragma warning restore 612, 618
         }

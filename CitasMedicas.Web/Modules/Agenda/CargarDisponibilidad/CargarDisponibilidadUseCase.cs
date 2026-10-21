@@ -72,7 +72,6 @@ public sealed class CargarDisponibilidadUseCase(ClinicaDbContext dbContext)
         {
             MedicoId = medico.Id,
             EspecialidadId = medico.EspecialidadId,
-            ProfesionalNombre = medico.Nombre,
             Fecha = request.Fecha.Value,
             HoraInicio = horaInicio,
             HoraFin = horaFin,

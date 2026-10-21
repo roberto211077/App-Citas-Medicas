@@ -42,7 +42,6 @@ public sealed class CargarDisponibilidadTests
         var turno = await dbContext.TurnosDisponibles.SingleAsync();
         Assert.Equal(7, turno.MedicoId);
         Assert.Equal(1, turno.EspecialidadId);
-        Assert.Equal("Ana Pérez", turno.ProfesionalNombre);
         Assert.Equal(new DateOnly(2030, 4, 10), turno.Fecha);
         Assert.Equal(new TimeOnly(9, 0), turno.HoraInicio);
         Assert.Equal(new TimeOnly(9, 30), turno.HoraFin);
@@ -177,7 +176,8 @@ public sealed class CargarDisponibilidadTests
 
         var controller = new AgendaController(
             new ListarMedicosUseCase(dbContext),
-            new CargarDisponibilidadUseCase(dbContext))
+            new CargarDisponibilidadUseCase(dbContext),
+            new CitasMedicas.Web.Modules.Agenda.ConsultarAgenda.ConsultarAgendaUseCase(dbContext))
         {
             ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
         };
@@ -225,7 +225,6 @@ public sealed class CargarDisponibilidadTests
             Id = 12,
             MedicoId = 7,
             EspecialidadId = 1,
-            ProfesionalNombre = "Ana Pérez",
             Fecha = new DateOnly(2030, 4, 10),
             HoraInicio = new TimeOnly(9, 0),
             HoraFin = new TimeOnly(9, 30),

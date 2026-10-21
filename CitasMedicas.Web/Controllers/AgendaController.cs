@@ -1,4 +1,5 @@
 using CitasMedicas.Web.Modules.Agenda.CargarDisponibilidad;
+using CitasMedicas.Web.Modules.Agenda.ConsultarAgenda;
 using CitasMedicas.Web.Modules.CatalogoMedico.ListarMedicos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -7,8 +8,20 @@ namespace CitasMedicas.Web.Controllers;
 
 public sealed class AgendaController(
     ListarMedicosUseCase listarMedicos,
-    CargarDisponibilidadUseCase cargarDisponibilidad) : Controller
+    CargarDisponibilidadUseCase cargarDisponibilidad,
+    ConsultarAgendaUseCase consultarAgenda) : Controller
 {
+    [HttpGet]
+    public async Task<IActionResult> ConsultarAgenda(CancellationToken cancellationToken)
+    {
+        var model = new ConsultarAgendaViewModel
+        {
+            Turnos = await consultarAgenda.EjecutarAsync(cancellationToken)
+        };
+
+        return View(model);
+    }
+
     [HttpGet]
     public async Task<IActionResult> CargarDisponibilidad(CancellationToken cancellationToken)
     {

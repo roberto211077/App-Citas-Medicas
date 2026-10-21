@@ -1,0 +1,50 @@
+@model CitasMedicas.Web.Modules.Agenda.ConsultarAgenda.ConsultarAgendaViewModel
+@{
+    ViewData["Title"] = "Turnos asignados";
+}
+
+<section class="specialties-page form-page">
+    <div class="page-heading">
+        <p class="eyebrow">AGENDA DE LA CLÍNICA</p>
+        <h1>Turnos asignados</h1>
+        <p class="page-intro">Consultas reservadas para todos los médicos.</p>
+    </div>
+
+    @if (Model.Turnos.Count == 0)
+    {
+        <div class="empty-state" role="status">
+            <h2>No hay turnos asignados</h2>
+            <p>Las consultas reservadas aparecerán en esta lista.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-scroll">
+            <table class="agenda-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Paciente</th>
+                        <th scope="col">Teléfono</th>
+                        <th scope="col">Correo</th>
+                        <th scope="col">Médico</th>
+                        <th scope="col">Fecha</th>
+                        <th scope="col">Hora</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var turno in Model.Turnos)
+                    {
+                        <tr>
+                            <td>@turno.PacienteNombre</td>
+                            <td>@turno.PacienteTelefono</td>
+                            <td>@(turno.PacienteCorreo ?? "Sin correo")</td>
+                            <td>@turno.MedicoNombre</td>
+                            <td>@turno.Fecha.ToString("dd/MM/yyyy")</td>
+                            <td>@turno.HoraInicio.ToString("HH:mm") a @turno.HoraFin.ToString("HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

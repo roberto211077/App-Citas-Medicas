@@ -1,18 +1,71 @@
-@model CitasMedicas.Web.Modules.Agenda.BuscarTurnos.TurnoDisponible
+@model CitasMedicas.Web.Modules.Reservas.ReservarTurno.ReservarTurnoRequest
 @{
     ViewData["Title"] = "Confirmar turno";
 }
 
 <section class="specialties-page next-step-page">
-    <a class="back-link" asp-controller="Especialidades" asp-action="BuscarTurnos" asp-route-id="@Model.EspecialidadId">← Volver a los turnos</a>
+    <a class="back-link" asp-controller="Especialidades" asp-action="BuscarTurnos" asp-route-id="@Model.Turno!.EspecialidadId">← Volver a los turnos</a>
     <p class="eyebrow">TURNO SELECCIONADO</p>
     <h1>Confirmá tu selección</h1>
     <p class="page-intro">Revisá la información del turno elegido para continuar con la reserva.</p>
 
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
+    }
     <article class="appointment-card" aria-label="Información del turno seleccionado">
-        <span>@Model.Especialidad.Nombre</span>
-        <strong>Dr./Dra. @Model.ProfesionalNombre</strong>
-        <span class="appointment-date">@Model.Fecha.ToString("dddd d 'de' MMMM 'de' yyyy", System.Globalization.CultureInfo.GetCultureInfo("es-AR"))</span>
-        <span>@Model.HoraInicio.ToString("HH:mm") a @Model.HoraFin.ToString("HH:mm")</span>
+        <span>@Model.Turno!.Especialidad.Nombre</span>
+        <strong>Dr./Dra. @Model.Turno.Medico.Nombre</strong>
+        <span class="appointment-date">@Model.Turno.Fecha.ToString("dddd d 'de' MMMM 'de' yyyy", System.Globalization.CultureInfo.GetCultureInfo("es-AR"))</span>
+        <span>@Model.Turno.HoraInicio.ToString("HH:mm") a @Model.Turno.HoraFin.ToString("HH:mm")</span>
     </article>
+
+    <form class="specialty-form" asp-controller="Especialidades" asp-action="SeleccionarTurno" method="get">
+        <input type="hidden" name="id" value="@Model.Turno!.Id" />
+        <div class="form-field">
+            <label asp-for="Dni">DNI</label>
+            <input asp-for="Dni" class="form-input" autocomplete="off" required />
+            <span asp-validation-for="Dni" class="field-error"></span>
+        </div>
+        <button type="submit" class="submit-button">Buscar datos por DNI</button>
+    </form>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Dni))
+    {
+    <form class="specialty-form search-form" asp-controller="Reservas" asp-action="Reservar" method="post">
+        <input asp-for="TurnoId" type="hidden" />
+        <input asp-for="Dni" type="hidden" />
+        @if (Model.PacienteEncontrado)
+        {
+            <p>Encontramos tus datos asociados a este DNI.</p>
+        }
+        <div class="form-field">
+            <label asp-for="PacienteNombre">Nombre del paciente</label>
+            <input asp-for="PacienteNombre" class="form-input" autocomplete="name" readonly="@Model.PacienteEncontrado" />
+            <span asp-validation-for="PacienteNombre" class="field-error"></span>
+        </div>
+        <div class="form-field">
+            <label asp-for="PacienteApellido">Apellido del paciente</label>
+            <input asp-for="PacienteApellido" class="form-input" autocomplete="family-name" readonly="@Model.PacienteEncontrado" />
+            <span asp-validation-for="PacienteApellido" class="field-error"></span>
+        </div>
+        <div class="form-field">
+            <label asp-for="PacienteTelefono">Teléfono</label>
+            <input asp-for="PacienteTelefono" class="form-input" autocomplete="tel" readonly="@Model.PacienteEncontrado" />
+            <span asp-validation-for="PacienteTelefono" class="field-error"></span>
+        </div>
+        <div class="form-field">
+            <label asp-for="PacienteCorreo">Correo electrónico</label>
+            <input asp-for="PacienteCorreo" type="email" class="form-input" autocomplete="email" readonly="@(Model.PacienteEncontrado && !string.IsNullOrWhiteSpace(Model.PacienteCorreo))" />
+            <span asp-validation-for="PacienteCorreo" class="field-error"></span>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="submit-button">Confirmar reserva</button>
+        </div>
+    </form>
+    }
 </section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

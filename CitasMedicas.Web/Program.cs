@@ -19,6 +19,8 @@ builder.Services.AddScoped<CitasMedicas.Web.Modules.CatalogoMedico.ListarMedicos
 builder.Services.AddScoped<CitasMedicas.Web.Modules.CatalogoMedico.EditarMedico.EditarMedicoUseCase>();
 builder.Services.AddScoped<CitasMedicas.Web.Modules.Agenda.BuscarTurnos.BuscarTurnosUseCase>();
 builder.Services.AddScoped<CitasMedicas.Web.Modules.Agenda.CargarDisponibilidad.CargarDisponibilidadUseCase>();
+builder.Services.AddScoped<CitasMedicas.Web.Modules.Agenda.ConsultarAgenda.ConsultarAgendaUseCase>();
+builder.Services.AddScoped<CitasMedicas.Web.Modules.Reservas.ReservarTurno.ReservarTurnoUseCase>();
 
 var app = builder.Build();
 

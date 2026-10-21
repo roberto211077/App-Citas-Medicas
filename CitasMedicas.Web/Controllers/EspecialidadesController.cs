@@ -1,6 +1,7 @@
 using CitasMedicas.Web.Modules.CatalogoMedico.ListarEspecialidades;
 using CitasMedicas.Web.Modules.CatalogoMedico.CrearEspecialidad;
 using CitasMedicas.Web.Modules.Agenda.BuscarTurnos;
+using CitasMedicas.Web.Modules.Reservas.ReservarTurno;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +11,8 @@ namespace CitasMedicas.Web.Controllers;
 public class EspecialidadesController(
     ListarEspecialidadesUseCase listarEspecialidades,
     CrearEspecialidadUseCase crearEspecialidad,
-    BuscarTurnosUseCase buscarTurnos) : Controller
+    BuscarTurnosUseCase buscarTurnos,
+    ReservarTurnoUseCase? reservarTurno = null) : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
@@ -67,7 +69,7 @@ public class EspecialidadesController(
     }
 
     [HttpGet]
-    public async Task<IActionResult> SeleccionarTurno(int id, CancellationToken cancellationToken)
+    public async Task<IActionResult> SeleccionarTurno(int id, string? dni = null, CancellationToken cancellationToken = default)
     {
         var turno = await buscarTurnos.BuscarDisponiblePorIdAsync(id, cancellationToken);
         if (turno is null)
@@ -75,7 +77,29 @@ public class EspecialidadesController(
             return NotFound();
         }
 
-        return View("ConfirmarTurno", turno);
+        var request = new ReservarTurnoRequest
+        {
+            TurnoId = turno.Id,
+            Turno = turno,
+            Dni = dni?.Trim() ?? string.Empty
+        };
+
+        if (!string.IsNullOrWhiteSpace(request.Dni))
+        {
+            var paciente = reservarTurno is null
+                ? null
+                : await reservarTurno.BuscarPacientePorDniAsync(request.Dni, cancellationToken);
+            if (paciente is not null)
+            {
+                request.PacienteEncontrado = true;
+                request.PacienteNombre = paciente.Nombre;
+                request.PacienteApellido = paciente.Apellido;
+                request.PacienteTelefono = paciente.Telefono;
+                request.PacienteCorreo = paciente.Correo ?? string.Empty;
+            }
+        }
+
+        return View("ConfirmarTurno", request);
     }
 
     [HttpGet]
