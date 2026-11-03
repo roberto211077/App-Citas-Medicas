@@ -1,20 +1,41 @@
 @model CitasMedicas.Web.Modules.Agenda.ConsultarAgenda.ConsultarAgendaViewModel
 @{
-    ViewData["Title"] = "Turnos asignados";
+    ViewData["Title"] = "Consultar agenda";
 }
 
 <section class="specialties-page form-page">
     <div class="page-heading">
         <p class="eyebrow">AGENDA DE LA CLÍNICA</p>
-        <h1>Turnos asignados</h1>
-        <p class="page-intro">Consultas reservadas para todos los médicos.</p>
+        <h1>Consultar agenda</h1>
+        <p class="page-intro">Seleccioná un médico para consultar todos sus turnos.</p>
     </div>
 
-    @if (Model.Turnos.Count == 0)
+    <form asp-controller="Agenda" asp-action="ConsultarAgenda" method="get" class="specialty-form agenda-filter">
+        <div class="form-field">
+            <label asp-for="MedicoId">Médico</label>
+            <select asp-for="MedicoId" class="form-input" required>
+                <option value="">Seleccioná un médico</option>
+                @foreach (var medico in Model.Medicos)
+                {
+                    <option value="@medico.Id">Dr./Dra. @medico.Nombre — @medico.EspecialidadNombre</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="submit-button">Consultar agenda</button>
+    </form>
+
+    @if (!Model.ConsultaRealizada)
     {
         <div class="empty-state" role="status">
-            <h2>No hay turnos asignados</h2>
-            <p>Las consultas reservadas aparecerán en esta lista.</p>
+            <h2>Seleccioná un médico</h2>
+            <p>La agenda mostrará sus horarios disponibles y reservados.</p>
+        </div>
+    }
+    else if (Model.Turnos.Count == 0)
+    {
+        <div class="empty-state" role="status">
+            <h2>No hay turnos para este médico</h2>
+            <p>Cuando se cargue disponibilidad, sus horarios aparecerán aquí.</p>
         </div>
     }
     else
@@ -23,6 +44,7 @@
             <table class="agenda-table">
                 <thead>
                     <tr>
+                        <th scope="col">Estado</th>
                         <th scope="col">Paciente</th>
                         <th scope="col">Teléfono</th>
                         <th scope="col">Correo</th>
@@ -35,9 +57,14 @@
                     @foreach (var turno in Model.Turnos)
                     {
                         <tr>
-                            <td>@turno.PacienteNombre</td>
-                            <td>@turno.PacienteTelefono</td>
-                            <td>@(turno.PacienteCorreo ?? "Sin correo")</td>
+                            <td>
+                                <span class="agenda-status @(turno.Disponible ? "agenda-status-available" : "agenda-status-reserved")">
+                                    @(turno.Disponible ? "Disponible" : "Reservado")
+                                </span>
+                            </td>
+                            <td>@(turno.PacienteNombre ?? "—")</td>
+                            <td>@(turno.PacienteTelefono ?? "—")</td>
+                            <td>@(turno.PacienteCorreo ?? "—")</td>
                             <td>@turno.MedicoNombre</td>
                             <td>@turno.Fecha.ToString("dd/MM/yyyy")</td>
                             <td>@turno.HoraInicio.ToString("HH:mm") a @turno.HoraFin.ToString("HH:mm")</td>

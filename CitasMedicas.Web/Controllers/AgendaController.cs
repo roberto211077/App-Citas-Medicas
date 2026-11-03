@@ -12,11 +12,26 @@ public sealed class AgendaController(
     ConsultarAgendaUseCase consultarAgenda) : Controller
 {
     [HttpGet]
-    public async Task<IActionResult> ConsultarAgenda(CancellationToken cancellationToken)
+    public async Task<IActionResult> ConsultarAgenda(int? medicoId, CancellationToken cancellationToken)
     {
+        var medicos = await listarMedicos.EjecutarAsync(cancellationToken);
+        if (medicoId.HasValue && medicos.All(medico => medico.Id != medicoId.Value))
+        {
+            return NotFound();
+        }
+
         var model = new ConsultarAgendaViewModel
         {
-            Turnos = await consultarAgenda.EjecutarAsync(cancellationToken)
+            MedicoId = medicoId,
+            Medicos = medicos.Select(medico => new MedicoAgendaOption
+            {
+                Id = medico.Id,
+                Nombre = medico.Nombre,
+                EspecialidadNombre = medico.Especialidad.Nombre
+            }).ToList(),
+            Turnos = medicoId.HasValue
+                ? await consultarAgenda.EjecutarAsync(medicoId.Value, cancellationToken)
+                : []
         };
 
         return View(model);

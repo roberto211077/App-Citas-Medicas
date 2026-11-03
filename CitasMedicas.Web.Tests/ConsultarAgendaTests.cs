@@ -14,7 +14,7 @@ namespace CitasMedicas.Web.Tests;
 public sealed class ConsultarAgendaTests
 {
     [Fact]
-    public async Task EjecutarAsync_ConsultaReservasConPacienteMedicoYHorario_OrdenadasYSoloAsignadas()
+    public async Task EjecutarAsync_FiltraMedicoIncluyeDisponiblesYReservadosEnOrdenCronologico()
     {
         await using var dbContext = CrearContexto();
         dbContext.Especialidades.Add(new Especialidad
@@ -48,32 +48,75 @@ public sealed class ConsultarAgendaTests
             Reserva(4, pacientes[1], turnos[1]));
         await dbContext.SaveChangesAsync();
 
-        var resultados = await new ConsultarAgendaUseCase(dbContext).EjecutarAsync();
+        var resultados = await new ConsultarAgendaUseCase(dbContext).EjecutarAsync(7);
 
         Assert.Equal(3, resultados.Count);
-        Assert.Equal("Lucía Tres", resultados[0].PacienteNombre);
+        Assert.Equal("Juan Uno", resultados[0].PacienteNombre);
         Assert.Equal("01112345678", resultados[0].PacienteTelefono);
-        Assert.Equal("lucía.tres@example.com", resultados[0].PacienteCorreo);
-        Assert.Equal("Luis Gómez", resultados[0].MedicoNombre);
-        Assert.Equal(new TimeOnly(8, 0), resultados[0].HoraInicio);
-        Assert.Equal("Juan Uno", resultados[1].PacienteNombre);
-        Assert.Equal("Ana Pérez", resultados[1].MedicoNombre);
-        Assert.Equal(new TimeOnly(9, 0), resultados[1].HoraInicio);
+        Assert.Equal("juan.uno@example.com", resultados[0].PacienteCorreo);
+        Assert.Equal("Ana Pérez", resultados[0].MedicoNombre);
+        Assert.Equal(new TimeOnly(9, 0), resultados[0].HoraInicio);
+        Assert.True(resultados[1].Disponible);
+        Assert.Null(resultados[1].PacienteNombre);
+        Assert.Equal(new TimeOnly(11, 0), resultados[1].HoraInicio);
+        Assert.False(resultados[2].Disponible);
+        Assert.Equal("María Dos", resultados[2].PacienteNombre);
         Assert.Equal(new DateOnly(2030, 4, 11), resultados[2].Fecha);
     }
 
     [Fact]
-    public async Task ConsultarAgenda_SinReservas_MuestraListaVacia()
+    public async Task ConsultarAgenda_SinMedico_MuestraSelectorSinResultados()
     {
         await using var dbContext = CrearContexto();
+        dbContext.Especialidades.Add(new Especialidad
+        {
+            Id = 1,
+            Nombre = "Cardiología",
+            Descripcion = "Atención cardiológica"
+        });
+        dbContext.Medicos.AddRange(
+            new Medico { Id = 7, Nombre = "Ana Pérez", EspecialidadId = 1 },
+            new Medico { Id = 8, Nombre = "Luis Gómez", EspecialidadId = 1 });
         dbContext.TurnosDisponibles.Add(Turno(7, new DateOnly(2030, 4, 10), new TimeOnly(9, 0), true));
         await dbContext.SaveChangesAsync();
 
-        var result = await CrearController(dbContext).ConsultarAgenda(default);
+        var result = await CrearController(dbContext).ConsultarAgenda(null, default);
 
         var view = Assert.IsType<ViewResult>(result);
         var model = Assert.IsType<ConsultarAgendaViewModel>(view.Model);
+        Assert.False(model.ConsultaRealizada);
+        Assert.Equal(2, model.Medicos.Count);
         Assert.Empty(model.Turnos);
+    }
+
+    [Fact]
+    public async Task ConsultarAgenda_MedicoExistenteSinTurnos_MuestraAgendaVacia()
+    {
+        await using var dbContext = CrearContexto();
+        dbContext.Especialidades.Add(new Especialidad
+        {
+            Id = 1,
+            Nombre = "Cardiología",
+            Descripcion = "Atención cardiológica"
+        });
+        dbContext.Medicos.Add(new Medico { Id = 8, Nombre = "Luis Gómez", EspecialidadId = 1 });
+        await dbContext.SaveChangesAsync();
+
+        var result = await CrearController(dbContext).ConsultarAgenda(8, default);
+
+        var view = Assert.IsType<ViewResult>(result);
+        var model = Assert.IsType<ConsultarAgendaViewModel>(view.Model);
+        Assert.True(model.ConsultaRealizada);
+        Assert.Equal(8, model.MedicoId);
+        Assert.Empty(model.Turnos);
+    }
+
+    [Fact]
+    public async Task ConsultarAgenda_MedicoInexistente_DevuelveNotFound()
+    {
+        await using var dbContext = CrearContexto();
+        var result = await CrearController(dbContext).ConsultarAgenda(404, default);
+        Assert.IsType<NotFoundResult>(result);
     }
 
     private static ClinicaDbContext CrearContexto()
